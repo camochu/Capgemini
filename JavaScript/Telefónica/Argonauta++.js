@@ -7,7 +7,7 @@
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js
 // @require     http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js
 // @grant       GM_addStyle
-// @version     0.2.1
+// @version     0.2.2
 // ==/UserScript==
 
 // Declaración de variables
@@ -47,7 +47,7 @@ document.addEventListener('keydown', function(event) {
     else if (event.ctrlKey && event.altKey && event.key === 'd') {
         console.log('Detectada combinación de teclas para "DIAGNOSTICO".');
         getResumen();
-        myResumen = '/*DIAGNOSTICO: ' + myResumen + '*/'
+        myResumen = '*/DIAGNOSTICO: ' + myResumen + '/*'
         //document.getElementById('arid_WIN_5_304247080').value=myResumen;
         $("[id*='304247080']").val(myResumen);
     }
