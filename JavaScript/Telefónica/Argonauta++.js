@@ -7,7 +7,7 @@
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js
 // @require     http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js
 // @grant       GM_addStyle
-// @version     0.1.2
+// @version     0.2.1
 // ==/UserScript==
 
 // Declaración de variables
@@ -20,7 +20,7 @@ var myEstado = "";
 var myComentario = "";
 var myRegistro = "";
 var myDate = new Date();
-var myDateStr = myDate.toLocaleDateString('en-GB');
+var myDateStr = myDate.toLocaleDateString('es-UK');
 var myCurrentView = "";
 
 // Elementos visuales
@@ -34,12 +34,22 @@ document.body.appendChild(myButton);
 // Se da funcionalidad al pulsar el botón
 myButton.onclick = copyINC;
 
-// Se detecta cuándo se guarda el ticket mediante "CTRL + ALT + ENTER"
-// para copiar los detalles del ticket al portapapeles
+// Se detectan pulsaciones de teclas y se actúa en consecuencia
 document.addEventListener('keydown', function(event) {
+    // Se detecta cuándo se guarda el ticket mediante "CTRL + ALT + ENTER"
+    // para copiar los detalles del ticket al portapapeles
     if (event.ctrlKey && event.altKey && event.key === 'Enter') {
         console.log('Detectada combinación de teclas para "Guardar". Se copian los datos al portapapeles.');
         copyINC();
+    }
+    // Se detecta cuándo se pulsa "CTRL + ALT + d"
+    // para copiar generar DIAGNOSTICO con resumen
+    else if (event.ctrlKey && event.altKey && event.key === 'd') {
+        console.log('Detectada combinación de teclas para "DIAGNOSTICO".');
+        getResumen();
+        myResumen = '/*DIAGNOSTICO: ' + myResumen + '*/'
+        //document.getElementById('arid_WIN_5_304247080').value=myResumen;
+        $("[id*='304247080']").val(myResumen);
     }
 });
 
