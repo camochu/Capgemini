@@ -65,14 +65,14 @@ document.addEventListener('keydown', function(event) {
 
 setInterval(function() {
     if ($("#label80137").text() != "Página de Inicio de TI" && $("[id*='1000000099']").last().val() == "Incidencia") {
-            console.log('Incidencia' + $("[id*='1000000099']").last().val());
+//            console.log('Incidencia' + $("[id*='1000000099']").last().val());
             myButton.style = "font-size: 15px; bottom: 15px; left: 15px; position: fixed; z-index: 99999; padding: 5px; background-color: rgb(255, 128, 128)"; // Anaranjado
             myButton.innerHTML = "Copiar INC 📋";
     }
     else if ($("#label80137").text() != "Página de Inicio de TI") {
         myButton.style = "font-size: 15px; bottom: 15px; left: 15px; position: fixed; z-index: 99999; padding: 5px; background-color: rgb(239, 239, 239)"; // Gris
         myButton.innerHTML = "Copiar 📋";
-        console.log('No incidencia' + $("[id*='1000000099']").last().val());
+//        console.log('No incidencia' + $("[id*='1000000099']").last().val());
     }
     else {
         myButton.style = "font-size: 15px; bottom: 15px; left: 15px; position: fixed; z-index: 99999; padding: 5px; background-color: rgb(239, 239, 239)"; // Gris
