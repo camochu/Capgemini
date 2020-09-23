@@ -7,7 +7,7 @@
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js
 // @require     http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js
 // @grant       GM_addStyle
-// @version     0.2.3
+// @version     0.2.4
 // ==/UserScript==
 
 // Declaración de variables
@@ -27,7 +27,7 @@ var myCurrentView = "";
 var myButton = document.createElement("Button");
 
 // Botón para copiar los detalles de la incidencia actual
-myButton.innerHTML = "Copiar INC 📋";
+myButton.innerHTML = " < Vacío > ";
 myButton.style = "font-size: 15px; bottom: 15px; left: 15px; position: fixed; z-index: 99999; padding: 5px; background-color: rgb(239, 239, 239)";
 document.body.appendChild(myButton);
 
@@ -50,7 +50,35 @@ document.addEventListener('keydown', function(event) {
         myResumen = '*/DIAGNOSTICO: ' + myResumen + '/*'
         $("[id*='304247080']").focus().val('').val(myResumen);
     }
+    // Se detecta cuándo se pulsa "CTRL + ALT + r"
+    // para rellenar categorizacion de resolución (diagnostico)
+    else if (event.ctrlKey && event.altKey && event.key === 'r') {
+        var myCRN1 = "TI CLIENTES";
+        var myCRN2 = "Motivo de Diagnóstico";
+        var myCRN3 = "Análisis y diagnóstico por parte del técnico";
+        console.log('Detectada combinación de teclas para "Categorización Resolución (diagnostico)".');
+//        $("[id*='1000002488']").val(myCRN1);
+//        $("[id*='1000003889']").focus().val('').val(myCRN2);
+//        $("[id*='1000003890']").focus().val('').val(myCRN3);
+    }
 });
+
+setInterval(function() {
+    if ($("#label80137").text() != "Página de Inicio de TI" && $("[id*='1000000099']").last().val() == "Incidencia") {
+            console.log('Incidencia' + $("[id*='1000000099']").last().val());
+            myButton.style = "font-size: 15px; bottom: 15px; left: 15px; position: fixed; z-index: 99999; padding: 5px; background-color: rgb(255, 128, 128)"; // Anaranjado
+            myButton.innerHTML = "Copiar INC 📋";
+    }
+    else if ($("#label80137").text() != "Página de Inicio de TI") {
+        myButton.style = "font-size: 15px; bottom: 15px; left: 15px; position: fixed; z-index: 99999; padding: 5px; background-color: rgb(239, 239, 239)"; // Gris
+        myButton.innerHTML = "Copiar 📋";
+        console.log('No incidencia' + $("[id*='1000000099']").last().val());
+    }
+    else {
+        myButton.style = "font-size: 15px; bottom: 15px; left: 15px; position: fixed; z-index: 99999; padding: 5px; background-color: rgb(239, 239, 239)"; // Gris
+        myButton.innerHTML = " < Vacío > ";
+    }
+}, 8000);
 
 ////////////////////////////
 ///       FUNCIONES      ///
@@ -80,7 +108,7 @@ function copyINC(){
         var self = $(this);
         if (!self.data('add')) {
             self.data('add', true);
-            self.text('INC copiada ✔️');
+            self.text('Copiada ✔️');
             self.css('background-color','#b8ffcb'); // Verde claro
 
             // Se coloca el registro en el portapapeles
@@ -89,8 +117,14 @@ function copyINC(){
 
             // Se aplica el estilo "Listo para copiar" al botón
             setTimeout(function() {
-                self.text('Copiar INC 📋').data('add', false);
-                self.css('background-color','#efefef'); // Gris estándar
+                if ($("[id*='1000000099']").last().val() == "Incidencia") {
+                    self.text('Copiar INC 📋').data('add', false);
+                    self.css('background-color','#ef8080'); // Anaranjado
+                }
+                else {
+                    self.text('Copiar 📋').data('add', false);
+                    self.css('background-color','#efefef'); // Gris estándar
+                }
             }, 3000);
         }
     }
