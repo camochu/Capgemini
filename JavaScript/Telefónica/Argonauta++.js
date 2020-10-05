@@ -7,7 +7,7 @@
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js
 // @require     http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js
 // @grant       GM_addStyle
-// @version     0.2.4
+// @version     0.2.5
 // ==/UserScript==
 
 // Declaración de variables
@@ -159,6 +159,7 @@ function getINC() {
 function getResumen() {
     myResumen = $("[id*='1000000000']").last().val();
     myResumen = myResumen.replace(/,/g, ";");
+    myResumen = myResumen.replace(/\t/g, ' ');
     console.log ("Resumen: " + myResumen);
 }
 
