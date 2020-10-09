@@ -1,14 +1,19 @@
 // ==UserScript==
-// @name        Argonauta++
+// @name        Argonauta++(beta)
 // @description Remedy UI modification
-// @copyright   2020, Raúl Díez Martín Year, (raul.diez-martin@capgemini.com)
+// @copyright   2020, Raúl Díez Martín. Fork: Miguel A. Pardo
 // @icon        https://itsmte.tor.telefonica.es/arsys/resources/images/favicon.ico
 // @match       https://itsmte.tor.telefonica.es/arsys/forms/onbmc-s/SHR%3ALandingConsole/Default+Administrator+View/*
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js
 // @require     http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js
 // @grant       GM_addStyle
-// @version     0.2.5
+// @version     0.3.0
 // ==/UserScript==
+
+// Novedades 0.3.0:
+//   - Se permite ctrl-alt-D (mayuscula) ademas de minuscula para diagnosticar
+//   - Se copia categorizacion de resolución para diagnostico con ctr-alt-d
+//     (pero es necesario hacer doble clic en las dos ultimas casillas para que guarde)
 
 // Declaración de variables
 var myUser = "";
@@ -43,24 +48,37 @@ document.addEventListener('keydown', function(event) {
         copyINC();
     }
     // Se detecta cuándo se pulsa "CTRL + ALT + d"
-    // para copiar generar DIAGNOSTICO con resumen
-    else if (event.ctrlKey && event.altKey && event.key === 'd') {
-        console.log('Detectada combinación de teclas para "DIAGNOSTICO".');
-        getResumen();
-        myResumen = '*/DIAGNOSTICO: ' + myResumen + '/*'
-        $("[id*='304247080']").focus().val('').val(myResumen);
+    else if (event.ctrlKey && event.altKey && (event.key === 'd' || event.key === 'D')) {
+        // se genera nota */DIAGNOSTICO+resumen/* si estoy en la pestaña detalles de trabajo
+        if ($("[id*='301626100']")[0].style.visibility ==='inherit') {
+            console.log('Detectada combinación de teclas para "DIAGNOSTICO".');
+            getResumen();
+            myResumen = '*/DIAGNOSTICO: ' + myResumen + '/*'
+            $("[id*='304247080']").focus().val('').val(myResumen);
+        }
+        // se rellena categorizacion de resolución si estoy en la pestaña categorizacion
+        else if ($("[id*='304287750']")[0].style.visibility ==='inherit') {
+            var myCRN1 = "TI CLIENTES";
+            var myCRN2 = "Motivo de Diagnóstico";
+            var myCRN3 = "Análisis y diagnóstico por parte del técnico";
+            console.log('Detectada combinación de teclas para "Categorización Resolución (diagnostico)".');
+            $("[id*='1000002488']").focus().val('').val(myCRN1);
+            $("[id*='1000003889']").focus().val('').val(myCRN2);
+            $("[id*='1000003890']").focus().val('').val(myCRN3);
+            $("[id*='1000002488']").focus();
+        }
     }
-    // Se detecta cuándo se pulsa "CTRL + ALT + r"
+    /*// Se detecta cuándo se pulsa "CTRL + ALT + r"
     // para rellenar categorizacion de resolución (diagnostico)
     else if (event.ctrlKey && event.altKey && event.key === 'r') {
         var myCRN1 = "TI CLIENTES";
         var myCRN2 = "Motivo de Diagnóstico";
         var myCRN3 = "Análisis y diagnóstico por parte del técnico";
         console.log('Detectada combinación de teclas para "Categorización Resolución (diagnostico)".');
-//        $("[id*='1000002488']").val(myCRN1);
-//        $("[id*='1000003889']").focus().val('').val(myCRN2);
-//        $("[id*='1000003890']").focus().val('').val(myCRN3);
-    }
+        $("[id*='1000002488']").focus().val('').val(myCRN1);
+        $("[id*='1000003889']").focus().val('').val(myCRN2);
+        $("[id*='1000003890']").focus().val('').val(myCRN3);
+    }*/
 });
 
 setInterval(function() {
