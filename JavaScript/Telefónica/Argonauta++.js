@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        Argonauta++
+// @name        Argonauta++(beta)
 // @description Remedy UI modification
 // @copyright   2020, Raúl Díez Martín. Fork: Miguel A. Pardo
 // @icon        https://itsmte.tor.telefonica.es/arsys/resources/images/favicon.ico
@@ -7,9 +7,11 @@
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js
 // @require     http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js
 // @grant       GM_addStyle
-// @version     0.3.0
+// @version     0.3.1
 // ==/UserScript==
 
+// Novedades 0.3.1:
+//   - Deficición de textos modelo para agregar notas con ctrl-alt-[1..9]
 // Novedades 0.3.0:
 //   - Se permite ctrl-alt-D (mayuscula) ademas de minuscula para diagnosticar
 //   - Se copia categorizacion de resolución para diagnostico con ctr-alt-d
@@ -27,6 +29,25 @@ var myRegistro = "";
 var myDate = new Date();
 var myDateStr = myDate.toLocaleDateString('es-UK');
 var myCurrentView = "";
+var myNote = [["Ayuda",""], // se rellena en función del resto de notas con el indice de notas para mostrarlo con ctrl-alt-0
+              ["Pendiente","*/Pendiente  de Usuario/Cliente (Pdte. Accion requerida Usuario/Cliente afectado)/*"],
+              ["Alta correo","Se crea correo en o365 y se asigna licencia"],
+              ["Baja correo pdte.","Se cambia licencia a E3 y se habilita suspensión por litigio.\nA las espera de 24h para desactivar licencia"],
+              ["Contacta tu si quies...","SDNIVEL1 no contacta con cliente. El contacto debe realizarlo el propio grupo que necesite o facilite información"],
+              ["",""],
+              ["",""],
+              ["",""],
+              ["",""],
+              ["",""]
+             ];
+// Se construye y se guarda el texto de ayuda
+myNote[0][1] = "Inserción de diagnostico\n";
+myNote[0][1] += "  Ctrl-Alt-d   \n\n";
+myNote[0][1] += "Inserción de notas (usar teclado numérico)\n";
+for(var i=1; i<myNote.length && myNote[i][0] != "" ; i++) {
+    // se van agregando las notas no vacías
+    myNote[0][1] = myNote[0][1] + "  Ctrl-Alt-" + i + "   " + myNote[i][0] + "\n";
+}
 
 // Elementos visuales
 var myButton = document.createElement("Button");
@@ -44,14 +65,13 @@ document.addEventListener('keydown', function(event) {
     // Se detecta cuándo se guarda el ticket mediante "CTRL + ALT + ENTER"
     // para copiar los detalles del ticket al portapapeles
     if (event.ctrlKey && event.altKey && event.key === 'Enter') {
-        console.log('Detectada combinación de teclas para "Guardar". Se copian los datos al portapapeles.');
+//        console.log('Detectada combinación de teclas para "Guardar". Se copian los datos al portapapeles.');
         copyINC();
     }
     // Se detecta cuándo se pulsa "CTRL + ALT + d"
     else if (event.ctrlKey && event.altKey && (event.key === 'd' || event.key === 'D')) {
         // se genera nota */DIAGNOSTICO+resumen/* si estoy en la pestaña detalles de trabajo
         if ($("[id*='301626100']")[0].style.visibility ==='inherit') {
-            console.log('Detectada combinación de teclas para "DIAGNOSTICO".');
             getResumen();
             myResumen = '*/DIAGNOSTICO: ' + myResumen + '/*'
             $("[id*='304247080']").focus().val('').val(myResumen);
@@ -61,24 +81,22 @@ document.addEventListener('keydown', function(event) {
             var myCRN1 = "TI CLIENTES";
             var myCRN2 = "Motivo de Diagnóstico";
             var myCRN3 = "Análisis y diagnóstico por parte del técnico";
-            console.log('Detectada combinación de teclas para "Categorización Resolución (diagnostico)".');
             $("[id*='1000002488']").focus().val('').val(myCRN1);
             $("[id*='1000003889']").focus().val('').val(myCRN2);
             $("[id*='1000003890']").focus().val('').val(myCRN3);
             $("[id*='1000002488']").focus();
         }
     }
-    /*// Se detecta cuándo se pulsa "CTRL + ALT + r"
-    // para rellenar categorizacion de resolución (diagnostico)
-    else if (event.ctrlKey && event.altKey && event.key === 'r') {
-        var myCRN1 = "TI CLIENTES";
-        var myCRN2 = "Motivo de Diagnóstico";
-        var myCRN3 = "Análisis y diagnóstico por parte del técnico";
-        console.log('Detectada combinación de teclas para "Categorización Resolución (diagnostico)".');
-        $("[id*='1000002488']").focus().val('').val(myCRN1);
-        $("[id*='1000003889']").focus().val('').val(myCRN2);
-        $("[id*='1000003890']").focus().val('').val(myCRN3);
-    }*/
+    // Se detecta cuándo se pulsa Ctrl-Alt-[0..9] en la pestaña detalles de trabajo
+    else if (event.ctrlKey && event.altKey && (event.key >= '0' && event.key <= '9') && $("[id*='301626100']")[0].style.visibility ==='inherit') {
+        // se muestar ayuda si ctrl-alt-0
+        if(event.key === '0') {
+            window.alert(myNote[0][1]);
+        }
+        // se inserta nota si ctrl-alt-[1..9]
+        else
+            $("[id*='304247080']").focus().val('').val(myNote[parseInt(event.key)][1]);
+    }
 });
 
 setInterval(function() {
