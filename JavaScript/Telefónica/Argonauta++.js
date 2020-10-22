@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        Argonauta++(beta)
+// @name        Argonauta++
 // @description Remedy UI modification
 // @copyright   2020, Raúl Díez Martín. Fork: Miguel A. Pardo
 // @icon        https://itsmte.tor.telefonica.es/arsys/resources/images/favicon.ico
