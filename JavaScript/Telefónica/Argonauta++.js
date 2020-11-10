@@ -1,6 +1,5 @@
 // ==UserScript==
 // @name        Argonauta++
-// @version     0.3.2
 // @description Remedy UI modification
 // @copyright   2020, Raúl Díez Martín. Fork: Miguel A. Pardo
 // @icon        https://itsmte.tor.telefonica.es/arsys/resources/images/favicon.ico
@@ -8,8 +7,13 @@
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js
 // @require     http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js
 // @grant       GM_addStyle
+// @version     0.3.3
 // ==/UserScript==
 
+// Novedades 0.3.3:
+//   - ctrl-alt-h Inserta ayuda en lugar de ctrl-alt-0
+//   - ctrl-alt-0 captura portapapeles y guarda para insertarlo con ctrl-alt-9
+//   - ctrl-alt-v inserta ciclicamente los tags de vithas en campo notas
 // Novedades 0.3.2:
 //   - Deficición de textos modelo para agregar notas con ctrl-alt-[1..9]
 // Novedades 0.3.0:
@@ -29,25 +33,32 @@ var myRegistro = "";
 var myDate = new Date();
 var myDateStr = myDate.toLocaleDateString('es-UK');
 var myCurrentView = "";
-var myNote = [["Ayuda",""], // se rellena en función del resto de notas con el indice de notas para mostrarlo con ctrl-alt-0
-              ["Pendiente","*/Pendiente  de Usuario/Cliente (Pdte. Accion requerida Usuario/Cliente afectado)/*"],
-              ["Alta correo","Se crea correo en o365 y se asigna licencia"],
+var myHelp = ""; // Texto de ayuda para mostrarlo con ctrl-alt-h
+var myNote = [["Pendiente","*/Pendiente  de Usuario/Cliente (Pdte. Accion requerida Usuario/Cliente afectado)/*"],
+              ["Alta correo 1/2","Se crea buzón remoto. A la espera de sincronización con O365"],
+              ["Alta correo 2/2","Se crea correo en o365 y se asigna licencia"],
               ["Baja correo pdte.","Se cambia licencia a E3 y se habilita suspensión por litigio.\nA las espera de 24h para desactivar licencia"],
               ["Contacta tu si quies...","SDNIVEL1 no contacta con cliente. El contacto debe realizarlo el propio grupo que necesite o facilite información"],
-              ["",""],
-              ["",""],
-              ["",""],
-              ["",""],
-              ["",""]
+              ["Nada de momento",""],
+              ["Nada de momento",""],
+              ["Nada de momento",""],
+              ["Inserta nota personalizada",""],
+              ["Modificar nota personalizada (captura portapapeles)",""]
              ];
 // Se construye y se guarda el texto de ayuda
-myNote[0][1] = "Inserción de diagnostico\n";
-myNote[0][1] += "  Ctrl-Alt-d   \n\n";
-myNote[0][1] += "Inserción de notas (usar teclado numérico)\n";
-for(var i=1; i<myNote.length && myNote[i][0] != "" ; i++) {
-    // se van agregando las notas no vacías
-    myNote[0][1] = myNote[0][1] + "  Ctrl-Alt-" + i + "   " + myNote[i][0] + "\n";
+myHelp = "Inserción de diagnostico\n";
+myHelp += "  Ctrl-Alt-d   \n\n";
+myHelp += "Inserción de notas (usar teclado numérico)\n";
+for(var i=1; i<myNote.length ; i++) {
+    // se van agregando las notas
+    myHelp += "  Ctrl-Alt-" + i + "   " + myNote[i-1][0] + "\n";
 }
+myHelp += "  Ctrl-Alt-0   " + myNote[myNote.length-1][0] + "\n\n";
+myHelp += "Inserción de TAGs de Vithas\n";
+myHelp += "  Ctrl-Alt-v   Insertar cíclicamente los TAGs";
+
+var vithasNote = ["*/AINCORRECTA/*", "*/NOGESTIONADO/*", "*/CHECK/*"];
+var currentVithasNote = 0;
 
 // Elementos visuales
 var myButton = document.createElement("Button");
@@ -62,11 +73,20 @@ myButton.onclick = copyINC;
 
 // Se detectan pulsaciones de teclas y se actúa en consecuencia
 document.addEventListener('keydown', function(event) {
-    // Se detecta cuándo se guarda el ticket mediante "CTRL + ALT + ENTER"
-    // para copiar los detalles del ticket al portapapeles
+    // Se detecta cuándo se guarda el ticket mediante "CTRL + ALT + ENTER" para copiar los detalles del ticket al portapapeles
     if (event.ctrlKey && event.altKey && event.key === 'Enter') {
-//        console.log('Detectada combinación de teclas para "Guardar". Se copian los datos al portapapeles.');
         copyINC();
+    }
+   // Se detecta cuándo se pulsa "CTRL + ALT + h" para mostrar ayuda
+    else if (event.ctrlKey && event.altKey && (event.key === 'h' || event.key === 'H')) {
+        window.alert(myHelp);
+    }
+   // Se detecta cuándo se pulsa "CTRL + ALT + v" para insertar TAGs de vithas
+    else if (event.ctrlKey && event.altKey && (event.key === 'v' || event.key === 'V')) {
+        // se rellena nota de vithas secuencialmente
+        if (currentVithasNote == vithasNote.length) currentVithasNote = 0;
+        console.log('Detectada combinación de teclas para notas de Vithas.'+currentVithasNote);
+        $("[id*='304247080']").focus().val('').val(vithasNote[currentVithasNote++]);
     }
     // Se detecta cuándo se pulsa "CTRL + ALT + d"
     else if (event.ctrlKey && event.altKey && (event.key === 'd' || event.key === 'D')) {
@@ -77,7 +97,7 @@ document.addEventListener('keydown', function(event) {
             $("[id*='304247080']").focus().val('').val(myResumen);
         }
         // se rellena categorizacion de resolución si estoy en la pestaña categorizacion
-        else if ($("[id*='304287750']")[0].style.visibility ==='inherit') {
+        else if (($("[id*='304287750']")[0].style.visibility ==='inherit') &&($("[id*='304287650']")[0].style.visibility ==='inherit')) {
             var myCRN1 = "TI CLIENTES";
             var myCRN2 = "Motivo de Diagnóstico";
             var myCRN3 = "Análisis y diagnóstico por parte del técnico";
@@ -89,19 +109,19 @@ document.addEventListener('keydown', function(event) {
     }
     // Se detecta cuándo se pulsa Ctrl-Alt-[0..9] en la pestaña detalles de trabajo
     else if (event.ctrlKey && event.altKey && (event.key >= '0' && event.key <= '9') && $("[id*='301626100']")[0].style.visibility ==='inherit') {
-        // se muestar ayuda si ctrl-alt-0
-        if(event.key === '0') {
-            window.alert(myNote[0][1]);
-        }
-        // se inserta nota si ctrl-alt-[1..9]
-        else
-            $("[id*='304247080']").focus().val('').val(myNote[parseInt(event.key)][1]);
+          // se crea nota personalizada si ctrl-alt-0
+          if(event.key === '0') {
+              navigator.clipboard.readText().then(
+                  clipText => myNote[8][1] = clipText);
+          }
+          // se inserta nota si ctrl-alt-[1..0]
+          else
+            $("[id*='304247080']").focus().val('').val(myNote[parseInt(event.key)-1][1]);
     }
 });
 
 setInterval(function() {
     if ($("#label80137").text() != "Página de Inicio de TI" && $("[id*='1000000099']").last().val() == "Incidencia") {
-//            console.log('Incidencia' + $("[id*='1000000099']").last().val());
             myButton.style = "font-size: 15px; bottom: 15px; left: 15px; position: fixed; z-index: 99999; padding: 5px; background-color: rgb(255, 128, 128)"; // Anaranjado
             myButton.innerHTML = "Copiar INC 📋";
     }
