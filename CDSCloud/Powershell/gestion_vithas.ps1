@@ -28,7 +28,7 @@ $banner_sinAD="  _   _                   _     _                               _
  |_| \_|\___/   \___/_/\_\_|___/\__\___|  \___|_| |_| /_/    \_\_____/ "
 do {
   cls
-  $aliasAD = Read-Host -Prompt "Por favor, introduce el alias de AD del usuario"
+  $aliasAD = Read-Host -Prompt "Introduce el alias de AD del usuario (sin @vithas.es)"
   $dominio= "@vithases.mail.onmicrosoft.com"
   $mailbox= $aliasAD + $dominio
   $ad_user=$null
